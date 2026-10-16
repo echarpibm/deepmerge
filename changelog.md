@@ -1,3 +1,8 @@
+# [4.3.2]
+
+- Security: fix prototype poisoning vulnerability (CVE-2026-93753). `propertyIsUnsafe()` now explicitly blocks `__proto__`, `constructor`, and `prototype` keys regardless of the prototype-chain check, preventing attacker-controlled source objects from injecting properties into `Object.prototype` or `Function.prototype` via a merge operation. [#273](https://github.com/TehShrike/deepmerge/issues/273)
+
+
 # [4.3.1](https://github.com/TehShrike/deepmerge/releases/tag/v4.3.1)
 
 - Fix type definition for arrayMerge options.  [#239](https://github.com/TehShrike/deepmerge/pull/239)

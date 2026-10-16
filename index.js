@@ -45,10 +45,15 @@ function propertyIsOnObject(object, property) {
 }
 
 // Protects from prototype poisoning and unexpected merging up the prototype chain.
+// CVE-2026-93753: explicitly block well-known pollution vectors regardless of the
+// prototype-chain check, which alone is insufficient for `constructor` and `prototype`.
 function propertyIsUnsafe(target, key) {
-	return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
-		&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
-			&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
+	return key === '__proto__'
+		|| key === 'constructor'
+		|| key === 'prototype'
+		|| (propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
+			&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+				&& Object.propertyIsEnumerable.call(target, key))) // and also unsafe if they're nonenumerable.
 }
 
 function mergeObject(target, source, options) {

@@ -58,6 +58,23 @@ test('merging strings works with a custom string merge', function(t) {
 	t.end()
 })
 
+// CVE-2026-93753: constructor.prototype merge must not pollute Object.prototype
+test('merging objects with own constructor does not pollute Object.prototype', function(t) {
+	var malicious = JSON.parse('{ "constructor": { "prototype": { "admin": true } } }')
+	var mergedObject = merge({}, malicious)
+	t.notOk(({}).admin, 'Object.prototype must not be polluted via constructor.prototype merge')
+	t.notOk(mergedObject.admin, 'the merged object must not inherit the injected property')
+	t.end()
+})
+
+// CVE-2026-93753: prototype key must be treated as unsafe and never merged
+test('merging objects with own prototype key does not copy to prototype', function(t) {
+	var malicious = { prototype: { admin: true } }
+	var mergedObject = merge({}, malicious)
+	t.notOk(mergedObject.admin, 'prototype key must not leak into the object prototype chain')
+	t.end()
+})
+
 test('merging objects with null prototype', function(t) {
 	var target = Object.create(null)
 	var source = Object.create(null)
